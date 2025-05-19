@@ -11,6 +11,13 @@ build/
 dist/
 *.egg-info/
 
+#  Media serving
+media/
+*.pyc
+__pycache__/
+staticfiles/
+db.sqlite3
+
 # VS Code settings
 .vscode/
 
