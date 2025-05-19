@@ -44,16 +44,20 @@ def updateItem(request):
 	print('Action:', action)
 	print('Product:', productId)
 
-	customer = request.user.customer
+	if request.user.is_authenticated:
+		customer, created = Customer.objects.get_or_create(user=request.user)
+	else:
+		return JsonResponse('User not authenticated', status=403)
+
 	product = Product.objects.get(id=productId)
 	order, created = Order.objects.get_or_create(customer=customer, complete=False)
 
 	orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
 
 	if action == 'add':
-		orderItem.quantity = (orderItem.quantity + 1)
+		orderItem.quantity += 1
 	elif action == 'remove':
-		orderItem.quantity = (orderItem.quantity - 1)
+		orderItem.quantity -= 1
 
 	orderItem.save()
 
@@ -61,8 +65,35 @@ def updateItem(request):
 		orderItem.delete()
 
 	return JsonResponse('Item was added', safe=False)
-
 def processOrder(request):
+	transaction_id = datetime.datetime.now().timestamp()
+	data = json.loads(request.body)
+
+	if request.user.is_authenticated:
+		customer, created = Customer.objects.get_or_create(user=request.user)
+		order, created = Order.objects.get_or_create(customer=customer, complete=False)
+	else:
+		customer, order = guestOrder(request, data)
+
+	total = float(data['form']['total'])
+	order.transaction_id = transaction_id
+
+	if total == order.get_cart_total:
+		order.complete = True
+	order.save()
+
+	if order.shipping:
+		ShippingAddress.objects.create(
+			customer=customer,
+			order=order,
+			address=data['shipping']['address'],
+			city=data['shipping']['city'],
+			state=data['shipping']['state'],
+			zipcode=data['shipping']['zipcode'],
+		)
+
+	return JsonResponse('Payment submitted..', safe=False)
+
 	transaction_id = datetime.datetime.now().timestamp()
 	data = json.loads(request.body)
 

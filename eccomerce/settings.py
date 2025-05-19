@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-yq@39#@$i2c2t%iz%l0dc(w-fgyudo9+^@i$jfv8a1@b=us1lw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['ecomm-v6at.onrender.com', 'localhost', '127.0.0.1']
 
@@ -85,8 +85,9 @@ WSGI_APPLICATION = 'eccomerce.wsgi.application'
 #     }
 # }
 DATABASES = {
-    'default': dj_database_url.config(default='postgresql://localhost/dbname')
+    'default': dj_database_url.config(default='postgresql://postgres:winner123@localhost/chiazz-db')
 }
+
 
 
 # Password validation
